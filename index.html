@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Free interactive Unit Economics calculator. CAC Payback, LTV:CAC, Cohort Retention, Gross Margin analysis. Built by Sukhpreet Singh, Aspiring ACCA.">
+<title>Unit Economics Model — by Sukhpreet Singh</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10;
+    --surface: #111318;
+    --surface2: #181c24;
+    --border: #1f2535;
+    --accent: #4f8ef7;
+    --accent2: #38d9a9;
+    --accent3: #f7c94f;
+    --danger: #f76e6e;
+    --text: #e8eaf0;
+    --muted: #6b7591;
+    --muted2: #3a4060;
+    --font-display: 'DM Serif Display', serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* Background pattern */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 20% 0%, rgba(79,142,247,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 100%, rgba(56,217,169,0.05) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrapper { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 0 24px 80px; }
+
+  /* ─── HERO ─── */
+  .hero {
+    padding: 72px 0 48px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 56px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 32px;
+  }
+
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--accent);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border: 1px solid rgba(79,142,247,0.25);
+    background: rgba(79,142,247,0.07);
+    padding: 4px 12px;
+    border-radius: 100px;
+    margin-bottom: 20px;
+  }
+  .tag::before { content: '◈'; font-size: 9px; }
+
+  .hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(36px, 5vw, 58px);
+    font-weight: 400;
+    line-height: 1.1;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+  .hero h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .hero-sub {
+    margin-top: 16px;
+    color: var(--muted);
+    font-size: 15px;
+    max-width: 540px;
+    line-height: 1.7;
+  }
+
+  .hero-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 24px;
+  }
+  .chip {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    padding: 4px 10px;
+    border-radius: 4px;
+    letter-spacing: 0.06em;
+  }
+
+  .author-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    text-align: right;
+    min-width: 180px;
+  }
+  .author-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-size: 16px;
+    color: #fff;
+    margin-left: auto;
+    margin-bottom: 10px;
+  }
+  .author-name { font-size: 13px; font-weight: 600; color: var(--text); }
+  .author-role { font-size: 11px; color: var(--muted); font-family: var(--font-mono); margin-top: 2px; }
+  .author-links { display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px; }
+  .author-links a {
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--accent);
+    text-decoration: none;
+    border: 1px solid rgba(79,142,247,0.3);
+    padding: 3px 8px;
+    border-radius: 4px;
+    transition: all 0.2s;
+  }
+  .author-links a:hover { background: rgba(79,142,247,0.1); }
+
+  /* ─── SECTIONS ─── */
+  .section {
+    margin-bottom: 48px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .section-num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent);
+    background: rgba(79,142,247,0.1);
+    border: 1px solid rgba(79,142,247,0.2);
+    padding: 3px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.1em;
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--text);
+  }
+
+  /* ─── INPUTS GRID ─── */
+  .inputs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+  }
+
+  .input-group {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    transition: border-color 0.2s;
+  }
+  .input-group:focus-within {
+    border-color: rgba(79,142,247,0.4);
+    background: var(--surface2);
+  }
+
+  .input-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-family: var(--font-mono);
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .input-hint {
+    font-size: 10px;
+    color: var(--muted2);
+    margin-top: 5px;
+    font-family: var(--font-mono);
+  }
+
+  .input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0 10px;
+  }
+
+  .input-prefix {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .input-wrap input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 15px;
+    padding: 10px 0;
+    width: 100%;
+  }
+
+  /* ─── KPI CARDS ─── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+  }
+
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 22px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .kpi-card:hover { transform: translateY(-2px); border-color: var(--muted2); }
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--kpi-color, var(--accent));
+  }
+
+  .kpi-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  .kpi-value {
+    font-family: var(--font-display);
+    font-size: 30px;
+    font-weight: 400;
+    color: var(--text);
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+
+  .kpi-badge {
+    display: inline-block;
+    margin-top: 10px;
+    font-size: 10px;
+    font-family: var(--font-mono);
+    padding: 3px 8px;
+    border-radius: 100px;
+    border: 1px solid currentColor;
+  }
+
+  .kpi-note {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 8px;
+    font-family: var(--font-mono);
+  }
+
+  /* ─── HEALTH SCORE ─── */
+  .health-bar-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px 32px;
+    margin-bottom: 16px;
+  }
+
+  .health-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .health-score-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .health-score-val {
+    font-family: var(--font-display);
+    font-size: 48px;
+    color: var(--text);
+  }
+
+  .health-track {
+    background: var(--border);
+    border-radius: 100px;
+    height: 8px;
+    overflow: hidden;
+  }
+
+  .health-fill {
+    height: 100%;
+    border-radius: 100px;
+    background: linear-gradient(90deg, var(--danger) 0%, var(--accent3) 40%, var(--accent2) 75%, #38d9a9 100%);
+    transition: width 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .health-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+  }
+  .health-labels span {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--muted2);
+  }
+
+  /* ─── COHORT TABLE ─── */
+  .cohort-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .cohort-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+
+  .cohort-table th {
+    background: var(--surface2);
+    color: var(--muted);
+    font-weight: 500;
+    text-align: right;
+    padding: 12px 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .cohort-table th:first-child { text-align: left; }
+
+  .cohort-table td {
+    padding: 11px 16px;
+    text-align: right;
+    border-bottom: 1px solid rgba(31,37,53,0.6);
+    color: var(--text);
+  }
+  .cohort-table td:first-child { text-align: left; color: var(--muted); }
+  .cohort-table tr:last-child td { border-bottom: none; }
+
+  .cohort-cell {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    background: var(--cell-bg, rgba(79,142,247,0.08));
+    color: var(--cell-color, var(--accent));
+  }
+
+  /* ─── PAYBACK CHART ─── */
+  .payback-chart-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+  }
+
+  .chart-title {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+
+  canvas {
+    width: 100% !important;
+    display: block;
+  }
+
+  /* ─── BENCHMARK ─── */
+  .benchmark-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+
+  .benchmark-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 22px;
+  }
+
+  .benchmark-metric {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .benchmark-compare {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .benchmark-label {
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--muted);
+    width: 60px;
+    flex-shrink: 0;
+  }
+
+  .benchmark-bar-track {
+    flex: 1;
+    background: var(--border);
+    border-radius: 100px;
+    height: 6px;
+    overflow: hidden;
+  }
+
+  .benchmark-bar-fill {
+    height: 100%;
+    border-radius: 100px;
+    transition: width 0.5s ease;
+  }
+
+  .benchmark-val {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text);
+    width: 50px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  /* ─── INTERPRETATION ─── */
+  .insight-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 10px 10px 0;
+    padding: 16px 20px;
+    margin-top: 16px;
+  }
+  .insight-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .insight-text {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.65;
+  }
+  .insight-text strong { color: var(--text); }
+
+  /* ─── FOOTER ─── */
+  .footer {
+    border-top: 1px solid var(--border);
+    padding-top: 32px;
+    margin-top: 64px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .footer-left { font-size: 12px; color: var(--muted); font-family: var(--font-mono); }
+  .footer-left strong { color: var(--text); }
+  .footer-right { display: flex; gap: 12px; }
+  .footer-right a {
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .footer-right a:hover { color: var(--accent); }
+
+  /* status colors */
+  .good { color: var(--accent2); border-color: var(--accent2); }
+  .warn { color: var(--accent3); border-color: var(--accent3); }
+  .bad  { color: var(--danger);  border-color: var(--danger);  }
+
+  @media (max-width: 700px) {
+    .hero { grid-template-columns: 1fr; }
+    .author-card { text-align: left; }
+    .author-avatar { margin-left: 0; }
+    .author-links { justify-content: flex-start; }
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- HERO -->
+  <header class="hero">
+    <div>
+      <div class="tag">Free Tool · Unit Economics</div>
+      <h1>Unit Economics <em>Dashboard</em></h1>
+      <p class="hero-sub">
+        Analyze the health of your business at the individual customer level — CAC Payback, LTV:CAC, Cohort Retention, Gross Margin, and Payback curves. Live, in your browser.
+      </p>
+      <div class="hero-chips">
+        <span class="chip">CAC Payback</span>
+        <span class="chip">LTV : CAC</span>
+        <span class="chip">Cohort Retention</span>
+        <span class="chip">Gross Margin</span>
+        <span class="chip">Magic Number</span>
+        <span class="chip">12-Month Recovery</span>
+      </div>
+    </div>
+    <div class="author-card">
+      <div class="author-avatar">SS</div>
+      <div class="author-name">Sukhpreet Singh</div>
+      <div class="author-role">Aspiring ACCA</div>
+      <div class="author-links">
+        <a href="https://www.linkedin.com/in/sukhpreet-parhar-b7b6392a0/" target="_blank">LinkedIn</a>
+        <a href="mailto:sukhpreet109@outlook.com">Hire Me</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- INPUTS -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <span class="section-title">Model Assumptions</span>
+    </div>
+    <div class="inputs-grid">
+      <div class="input-group">
+        <label class="input-label">CAC — Customer Acquisition Cost</label>
+        <div class="input-wrap">
+          <span class="input-prefix">$</span>
+          <input type="number" id="cac" value="1200" min="0" step="50">
+        </div>
+        <div class="input-hint">Total cost to acquire one customer</div>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Monthly Recurring Revenue / Customer</label>
+        <div class="input-wrap">
+          <span class="input-prefix">$</span>
+          <input type="number" id="arpu" value="150" min="1" step="10">
+        </div>
+        <div class="input-hint">Avg revenue per user per month</div>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Gross Margin</label>
+        <div class="input-wrap">
+          <input type="number" id="gm" value="75" min="1" max="100" step="1">
+          <span class="input-prefix">%</span>
+        </div>
+        <div class="input-hint">Revenue minus COGS ÷ revenue</div>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Monthly Churn Rate</label>
+        <div class="input-wrap">
+          <input type="number" id="churn" value="3" min="0.1" max="50" step="0.1">
+          <span class="input-prefix">%</span>
+        </div>
+        <div class="input-hint">% of customers lost per month</div>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Monthly S&M Spend</label>
+        <div class="input-wrap">
+          <span class="input-prefix">$</span>
+          <input type="number" id="smSpend" value="50000" min="0" step="1000">
+        </div>
+        <div class="input-hint">Sales & Marketing budget/month</div>
+      </div>
+      <div class="input-group">
+        <label class="input-label">New MRR Added (This Month)</label>
+        <div class="input-wrap">
+          <span class="input-prefix">$</span>
+          <input type="number" id="newMRR" value="8000" min="0" step="500">
+        </div>
+        <div class="input-hint">New MRR generated this month</div>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Expansion MRR Rate</label>
+        <div class="input-wrap">
+          <input type="number" id="expansion" value="2" min="0" max="30" step="0.5">
+          <span class="input-prefix">%</span>
+        </div>
+        <div class="input-hint">Upsell / NRR expansion per month</div>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Discount Rate (WACC)</label>
+        <div class="input-wrap">
+          <input type="number" id="wacc" value="15" min="1" max="50" step="1">
+          <span class="input-prefix">%</span>
+        </div>
+        <div class="input-hint">Used to discount future cash flows</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KPIs -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <span class="section-title">Key Unit Economics Metrics</span>
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi-card" style="--kpi-color: var(--accent)">
+        <div class="kpi-label">CAC Payback Period</div>
+        <div class="kpi-value" id="kpi-payback">—</div>
+        <div class="kpi-note">months to recover acquisition cost</div>
+        <div class="kpi-badge" id="badge-payback">—</div>
+      </div>
+      <div class="kpi-card" style="--kpi-color: var(--accent2)">
+        <div class="kpi-label">LTV : CAC Ratio</div>
+        <div class="kpi-value" id="kpi-ltvcac">—</div>
+        <div class="kpi-note">lifetime value vs cost to acquire</div>
+        <div class="kpi-badge" id="badge-ltvcac">—</div>
+      </div>
+      <div class="kpi-card" style="--kpi-color: var(--accent3)">
+        <div class="kpi-label">Customer LTV</div>
+        <div class="kpi-value" id="kpi-ltv">—</div>
+        <div class="kpi-note">gross-margin adjusted lifetime value</div>
+      </div>
+      <div class="kpi-card" style="--kpi-color: #a78bfa">
+        <div class="kpi-label">Customer Lifetime</div>
+        <div class="kpi-value" id="kpi-life">—</div>
+        <div class="kpi-note">expected months before churn</div>
+      </div>
+      <div class="kpi-card" style="--kpi-color: var(--accent2)">
+        <div class="kpi-label">Magic Number</div>
+        <div class="kpi-value" id="kpi-magic">—</div>
+        <div class="kpi-note">ARR growth per $ S&M spent</div>
+        <div class="kpi-badge" id="badge-magic">—</div>
+      </div>
+      <div class="kpi-card" style="--kpi-color: var(--accent3)">
+        <div class="kpi-label">Net Revenue Retention</div>
+        <div class="kpi-value" id="kpi-nrr">—</div>
+        <div class="kpi-note">expansion vs churn net effect</div>
+        <div class="kpi-badge" id="badge-nrr">—</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HEALTH SCORE -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <span class="section-title">Unit Economics Health Score</span>
+    </div>
+    <div class="health-bar-wrap">
+      <div class="health-header">
+        <div>
+          <div class="health-score-label">Overall Health Score</div>
+          <div class="health-score-val" id="health-score">—</div>
+        </div>
+        <div id="health-verdict" style="text-align:right; font-family: var(--font-mono); font-size: 13px; color: var(--muted);">—</div>
+      </div>
+      <div class="health-track">
+        <div class="health-fill" id="health-fill" style="width: 0%"></div>
+      </div>
+      <div class="health-labels">
+        <span>Critical</span>
+        <span>Weak</span>
+        <span>Healthy</span>
+        <span>World-class</span>
+      </div>
+    </div>
+    <div class="insight-box">
+      <div class="insight-label">💡 Interpretation</div>
+      <div class="insight-text" id="insight-text">Enter your assumptions above to see an interpretation of your unit economics.</div>
+    </div>
+  </section>
+
+  <!-- CAC RECOVERY CHART -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <span class="section-title">CAC Recovery Curve</span>
+    </div>
+    <div class="payback-chart-wrap">
+      <div class="chart-title">Cumulative Gross Profit per Customer vs. CAC — 24 Month View</div>
+      <canvas id="paybackChart" height="320"></canvas>
+    </div>
+  </section>
+
+  <!-- COHORT RETENTION -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <span class="section-title">Cohort Retention Schedule</span>
+    </div>
+    <div class="cohort-wrap">
+      <table class="cohort-table" id="cohortTable">
+        <thead>
+          <tr>
+            <th>Month</th>
+            <th>Customers Retained</th>
+            <th>Retention %</th>
+            <th>MRR Contribution</th>
+            <th>Cumul. Gross Profit</th>
+          </tr>
+        </thead>
+        <tbody id="cohortBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- BENCHMARK -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <span class="section-title">Industry Benchmark Comparison</span>
+    </div>
+    <div class="benchmark-grid">
+      <div class="benchmark-card">
+        <div class="benchmark-metric">CAC Payback Period</div>
+        <div class="benchmark-compare">
+          <span class="benchmark-label">You</span>
+          <div class="benchmark-bar-track"><div class="benchmark-bar-fill" id="bench-payback-you" style="background:var(--accent)"></div></div>
+          <span class="benchmark-val" id="bench-payback-you-val">—</span>
+        </div>
+        <div class="benchmark-compare">
+          <span class="benchmark-label">Good</span>
+          <div class="benchmark-bar-track"><div class="benchmark-bar-fill" style="width:60%; background:var(--accent2)"></div></div>
+          <span class="benchmark-val">12 mo</span>
+        </div>
+        <div class="benchmark-compare">
+          <span class="benchmark-label">World</span>
+          <div class="benchmark-bar-track"><div class="benchmark-bar-fill" style="width:30%; background:var(--accent3)"></div></div>
+          <span class="benchmark-val">6 mo</span>
+        </div>
+      </div>
+      <div class="benchmark-card">
+        <div class="benchmark-metric">LTV : CAC Ratio</div>
+        <div class="benchmark-compare">
+          <span class="benchmark-label">You</span>
+          <div class="benchmark-bar-track"><div class="benchmark-bar-fill" id="bench-ltvcac-you" style="background:var(--accent)"></div></div>
+          <span class="benchmark-val" id="bench-ltvcac-you-val">—</span>
+        </div>
+        <div class="benchmark-compare">
+          <span class="benchmark-label">Good</span>
+          <div class="benchmark-bar-track"><div class="benchmark-bar-fill" style="width:60%; background:var(--accent2)"></div></div>
+          <span class="benchmark-val">3x</span>
+        </div>
+        <div class="benchmark-compare">
+          <span class="benchmark-label">World</span>
+          <div class="benchmark-bar-track"><div class="benchmark-bar-fill" style="width:100%; background:var(--accent3)"></div></div>
+          <span class="benchmark-val">5x+</span>
+        </div>
+      </div>
+      <div class="benchmark-card">
+        <div class="benchmark-metric">Net Revenue Retention</div>
+        <div class="benchmark-compare">
+          <span class="benchmark-label">You</span>
+          <div class="benchmark-bar-track"><div class="benchmark-bar-fill" id="bench-nrr-you" style="background:var(--accent)"></div></div>
+          <span class="benchmark-val" id="bench-nrr-you-val">—</span>
+        </div>
+        <div class="benchmark-compare">
+          <span class="benchmark-label">Good</span>
+          <div class="benchmark-bar-track"><div class="benchmark-bar-fill" style="width:75%; background:var(--accent2)"></div></div>
+          <span class="benchmark-val">100%</span>
+        </div>
+        <div class="benchmark-compare">
+          <span class="benchmark-label">World</span>
+          <div class="benchmark-bar-track"><div class="benchmark-bar-fill" style="width:100%; background:var(--accent3)"></div></div>
+          <span class="benchmark-val">120%+</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-left">
+      <strong>Sukhpreet Singh</strong> · Aspiring ACCA · Unit Economics Finance<br>
+      Free to use · Share freely · Built with ♥ for SaaS founders
+    </div>
+    <div class="footer-right">
+      <a href="https://www.linkedin.com/in/sukhpreet-parhar-b7b6392a0/" target="_blank">LinkedIn</a>
+      <a href="mailto:sukhpreet109@outlook.com">Contact</a>
+      <a href="https://sukhpreetparhar.github.io/SaaS-MRR-Model/index.html" target="_blank">MRR Model →</a>
+    </div>
+  </footer>
+
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+
+<script>
+let chart = null;
+
+function fmt(n, prefix='$', decimals=0) {
+  if (!isFinite(n)) return '∞';
+  if (n >= 1e6) return prefix + (n/1e6).toFixed(1) + 'M';
+  if (n >= 1e3) return prefix + (n/1e3).toFixed(1) + 'K';
+  return prefix + n.toFixed(decimals);
+}
+
+function getInputs() {
+  return {
+    cac:       +document.getElementById('cac').value || 0,
+    arpu:      +document.getElementById('arpu').value || 1,
+    gm:        +document.getElementById('gm').value / 100 || 0,
+    churn:     +document.getElementById('churn').value / 100 || 0.001,
+    smSpend:   +document.getElementById('smSpend').value || 0,
+    newMRR:    +document.getElementById('newMRR').value || 0,
+    expansion: +document.getElementById('expansion').value / 100 || 0,
+    wacc:      +document.getElementById('wacc').value / 100 || 0.15,
+  };
+}
+
+function classify(val, thresholds, labels) {
+  for (let i = 0; i < thresholds.length; i++) {
+    if (val <= thresholds[i]) return labels[i];
+  }
+  return labels[labels.length - 1];
+}
+
+function badgeClass(label) {
+  if (['Excellent','World-class','Very Healthy','Strong'].includes(label)) return 'good';
+  if (['Good','Healthy','OK'].includes(label)) return 'warn';
+  return 'bad';
+}
+
+function compute() {
+  const { cac, arpu, gm, churn, smSpend, newMRR, expansion, wacc } = getInputs();
+
+  const lifeMonths = 1 / churn;
+  const marginARPU  = arpu * gm;
+
+  // LTV (discounted)
+  const monthlyRate = wacc / 12;
+  const ltv = marginARPU / (churn + monthlyRate);
+
+  const ltvCac = cac > 0 ? ltv / cac : Infinity;
+
+  // CAC Payback (simple gross margin basis)
+  const payback = marginARPU > 0 ? cac / marginARPU : Infinity;
+
+  // NRR
+  const nrr = (1 - churn + expansion) * 100;
+
+  // Magic Number
+  const magic = smSpend > 0 ? (newMRR * 12) / smSpend : 0;
+
+  return { lifeMonths, ltv, ltvCac, payback, nrr, magic, marginARPU, cac, arpu, gm, churn, smSpend, expansion };
+}
+
+function healthScore(m) {
+  let score = 0;
+  // LTV:CAC (0-40 pts)
+  score += Math.min(40, Math.max(0, m.ltvCac * 8));
+  // Payback (0-25 pts) — lower is better, 6 months = 25, 24+ = 0
+  score += Math.max(0, 25 - (m.payback - 6) * 1.5);
+  // NRR (0-20 pts)
+  score += Math.max(0, Math.min(20, (m.nrr - 80) * 1));
+  // Magic Number (0-15 pts)
+  score += Math.min(15, m.magic * 10);
+  return Math.round(Math.min(100, Math.max(0, score)));
+}
+
+function renderKPIs(m) {
+  // Payback
+  const paybackEl = document.getElementById('kpi-payback');
+  const badgeP = document.getElementById('badge-payback');
+  if (!isFinite(m.payback)) { paybackEl.textContent = '∞'; }
+  else { paybackEl.textContent = m.payback.toFixed(1) + ' mo'; }
+  const pLabel = classify(m.payback, [6,12,18,Infinity], ['World-class','Excellent','Good','Weak']);
+  badgeP.textContent = pLabel;
+  badgeP.className = 'kpi-badge ' + badgeClass(pLabel);
+
+  // LTV:CAC
+  document.getElementById('kpi-ltvcac').textContent = isFinite(m.ltvCac) ? m.ltvCac.toFixed(1) + 'x' : '∞';
+  const lLabel = classify(m.ltvCac, [1,3,5,Infinity], ['Weak','OK','Healthy','World-class']);
+  const badgeL = document.getElementById('badge-ltvcac');
+  badgeL.textContent = lLabel;
+  badgeL.className = 'kpi-badge ' + badgeClass(lLabel);
+
+  // LTV
+  document.getElementById('kpi-ltv').textContent = fmt(m.ltv);
+
+  // Life
+  document.getElementById('kpi-life').textContent = isFinite(m.lifeMonths) ? m.lifeMonths.toFixed(1) + ' mo' : '∞';
+
+  // Magic
+  document.getElementById('kpi-magic').textContent = m.magic.toFixed(2) + 'x';
+  const mLabel = classify(m.magic, [0.5,0.75,1,Infinity], ['Weak','OK','Good','Strong']);
+  const badgeM = document.getElementById('badge-magic');
+  badgeM.textContent = mLabel;
+  badgeM.className = 'kpi-badge ' + badgeClass(mLabel);
+
+  // NRR
+  document.getElementById('kpi-nrr').textContent = m.nrr.toFixed(1) + '%';
+  const nLabel = m.nrr >= 120 ? 'World-class' : m.nrr >= 100 ? 'Healthy' : m.nrr >= 85 ? 'OK' : 'Weak';
+  const badgeN = document.getElementById('badge-nrr');
+  badgeN.textContent = nLabel;
+  badgeN.className = 'kpi-badge ' + badgeClass(nLabel);
+}
+
+function renderHealth(m) {
+  const score = healthScore(m);
+  document.getElementById('health-score').textContent = score + ' / 100';
+  document.getElementById('health-fill').style.width = score + '%';
+
+  let verdict, insight;
+  if (score >= 80) {
+    verdict = '🚀 World-class unit economics';
+    insight = `<strong>Outstanding.</strong> Your LTV:CAC of <strong>${isFinite(m.ltvCac) ? m.ltvCac.toFixed(1)+'x' : '∞'}</strong> and payback of <strong>${isFinite(m.payback) ? m.payback.toFixed(1)+' months' : '∞'}</strong> place you in the top tier of SaaS businesses. Continue investing aggressively in growth — your economics strongly support it.`;
+  } else if (score >= 60) {
+    verdict = '✅ Healthy — keep optimizing';
+    insight = `<strong>Good foundation.</strong> LTV:CAC at <strong>${isFinite(m.ltvCac) ? m.ltvCac.toFixed(1)+'x' : '∞'}</strong> is investable. Focus on reducing churn (currently <strong>${(m.churn*100).toFixed(1)}%/mo</strong>) and expanding NRR (<strong>${m.nrr.toFixed(1)}%</strong>) to push into world-class territory.`;
+  } else if (score >= 35) {
+    verdict = '⚠️ Developing — needs attention';
+    insight = `<strong>Mixed signals.</strong> Your CAC payback of <strong>${isFinite(m.payback) ? m.payback.toFixed(1)+' months' : '∞'}</strong> is high. Focus on increasing gross margin (<strong>${(m.gm*100).toFixed(0)}%</strong>), reducing CAC (<strong>$${m.cac.toFixed(0)}</strong>), or cutting churn to improve unit sustainability.`;
+  } else {
+    verdict = '🔴 Critical — unit economics at risk';
+    insight = `<strong>Urgent action needed.</strong> At <strong>${(m.churn*100).toFixed(1)}% monthly churn</strong>, customer lifetime is only <strong>${m.lifeMonths.toFixed(1)} months</strong>, which is insufficient to recover your $${m.cac.toFixed(0)} CAC. Prioritize retention and margin improvement before scaling spend.`;
+  }
+
+  document.getElementById('health-verdict').textContent = verdict;
+  document.getElementById('insight-text').innerHTML = insight;
+}
+
+function renderChart(m) {
+  const labels = [];
+  const cumGP = [];
+  const cacLine = [];
+  for (let mo = 0; mo <= 24; mo++) {
+    labels.push('M' + mo);
+    // cumulative gross profit considering churn decay
+    let cum = 0;
+    for (let i = 1; i <= mo; i++) {
+      const retained = Math.pow(1 - m.churn, i - 1);
+      cum += m.arpu * m.gm * retained;
+    }
+    cumGP.push(+cum.toFixed(2));
+    cacLine.push(m.cac);
+  }
+
+  const ctx = document.getElementById('paybackChart').getContext('2d');
+  if (chart) chart.destroy();
+
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Cumulative Gross Profit / Customer',
+          data: cumGP,
+          borderColor: '#4f8ef7',
+          backgroundColor: 'rgba(79,142,247,0.08)',
+          borderWidth: 2.5,
+          pointRadius: 0,
+          fill: true,
+          tension: 0.4,
+        },
+        {
+          label: 'CAC (Recovery Line)',
+          data: cacLine,
+          borderColor: '#f76e6e',
+          borderWidth: 1.5,
+          borderDash: [6,4],
+          pointRadius: 0,
+          fill: false,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          labels: { color: '#6b7591', font: { family: 'DM Mono', size: 11 }, boxWidth: 16 }
+        },
+        tooltip: {
+          backgroundColor: '#111318',
+          borderColor: '#1f2535',
+          borderWidth: 1,
+          titleColor: '#e8eaf0',
+          bodyColor: '#6b7591',
+          titleFont: { family: 'DM Mono', size: 11 },
+          bodyFont: { family: 'DM Mono', size: 11 },
+          callbacks: {
+            label: ctx => ' ' + ctx.dataset.label + ': $' + ctx.parsed.y.toFixed(0)
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: 'rgba(31,37,53,0.8)' },
+          ticks: { color: '#3a4060', font: { family: 'DM Mono', size: 10 } }
+        },
+        y: {
+          grid: { color: 'rgba(31,37,53,0.8)' },
+          ticks: {
+            color: '#3a4060',
+            font: { family: 'DM Mono', size: 10 },
+            callback: v => '$' + v.toFixed(0)
+          }
+        }
+      }
+    }
+  });
+}
+
+function renderCohort(m) {
+  const body = document.getElementById('cohortBody');
+  body.innerHTML = '';
+  let cumGP = 0;
+  const months = [0,1,2,3,4,5,6,9,12,18,24];
+  for (const mo of months) {
+    if (mo === 0) {
+      cumGP = 0;
+    } else {
+      for (let i = Math.max(1, months[months.indexOf(mo)-1]+1); i <= mo; i++) {
+        cumGP += m.arpu * m.gm * Math.pow(1 - m.churn, i-1);
+      }
+    }
+    const retained = mo === 0 ? 1 : Math.pow(1 - m.churn, mo);
+    const retPct = (retained * 100);
+    const mrr = m.arpu * retained;
+    const recovered = mo === 0 ? 0 : (cumGP / m.cac * 100);
+
+    const hue = retPct >= 80 ? '#38d9a9' : retPct >= 50 ? '#f7c94f' : '#f76e6e';
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>Month ${mo}</td>
+      <td><span class="cohort-cell" style="--cell-bg: rgba(79,142,247,0.08); --cell-color: var(--accent)">${(retained*100).toFixed(1)}%</span></td>
+      <td style="color:${hue}">${retPct.toFixed(1)}%</td>
+      <td>$${mrr.toFixed(0)}</td>
+      <td style="color: ${recovered >= 100 ? 'var(--accent2)' : 'var(--muted)'}">${mo > 0 ? recovered.toFixed(1)+'%' : '—'}</td>
+    `;
+    body.appendChild(tr);
+  }
+}
+
+function renderBenchmarks(m) {
+  // Payback: scale where 0 months = 100%, 24+ = 0%
+  const paybackPct = Math.max(0, Math.min(100, 100 - (m.payback / 24 * 100)));
+  document.getElementById('bench-payback-you').style.width = paybackPct + '%';
+  document.getElementById('bench-payback-you-val').textContent = isFinite(m.payback) ? m.payback.toFixed(1) + ' mo' : '∞';
+
+  // LTV:CAC: scale 5x = 100%
+  const ltvcacPct = Math.min(100, (m.ltvCac / 5) * 100);
+  document.getElementById('bench-ltvcac-you').style.width = ltvcacPct + '%';
+  document.getElementById('bench-ltvcac-you-val').textContent = isFinite(m.ltvCac) ? m.ltvCac.toFixed(1) + 'x' : '∞';
+
+  // NRR: scale 80%=0, 130%=100%
+  const nrrPct = Math.max(0, Math.min(100, (m.nrr - 80) / 50 * 100));
+  document.getElementById('bench-nrr-you').style.width = nrrPct + '%';
+  document.getElementById('bench-nrr-you-val').textContent = m.nrr.toFixed(1) + '%';
+}
+
+function update() {
+  const m = compute();
+  renderKPIs(m);
+  renderHealth(m);
+  renderChart(m);
+  renderCohort(m);
+  renderBenchmarks(m);
+}
+
+// bind inputs
+document.querySelectorAll('input').forEach(el => el.addEventListener('input', update));
+
+// init
+update();
+</script>
+</body>
+</html>
